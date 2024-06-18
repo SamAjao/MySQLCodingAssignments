@@ -25,7 +25,8 @@ public class ProjectsApp {
 	
 	// @formatter:off
 	private List<String> operations = List.of(
-			"1) Add a project"
+			"1) Add a project",
+			"2) List projects"
 	);			
 	// @formatter:on
 	
@@ -50,6 +51,9 @@ public class ProjectsApp {
 				case 1:
 					createProject();
 					break;
+				case 2:
+					listProjects();
+					break;
 				default:
 					System.out.println("\n" + selection + " is not a valid selection. Try again.");
 					break;
@@ -59,6 +63,15 @@ public class ProjectsApp {
 				System.out.println("\nError: " + e + " Try again.");
 			}
 		}
+		
+	}
+
+	private void listProjects() {
+		List<Project> projects = projectService.fetchAllProjects();
+		
+		System.out.println("\nProjects:");
+		
+		projects.forEach(project -> System.out.println("  " + project.getProjectId() +  ":  " +project.getProjectName()));
 		
 	}
 
