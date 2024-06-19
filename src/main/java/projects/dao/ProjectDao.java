@@ -13,12 +13,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import projects.entity.Category;
+import projects.entity.Material;
 import projects.entity.Project;
+import projects.entity.Step;
 import provided.util.DaoBase;
 import projects.dao.DbConnection;
 import projects.exception.DbException;
@@ -141,5 +145,71 @@ public class ProjectDao extends DaoBase {
 		
 		
 	}//End fetchProjectById()
+
+	
+	private List<Material> fetchMaterialsForProject(Connection conn, Integer projectId) throws SQLException {
+		String sql = "SELECT * FROM " + MATERIAL_TABLE + " WHERE project_id = ?";
+		
+		try(PreparedStatement stmt = conn.prepareStatement(sql)){
+			setParameter(stmt, 1, projectId, Integer.class);
+			
+			try(ResultSet rs = stmt.executeQuery()){
+				List<Material> materials = new LinkedList<Material>();
+				
+				while(rs.next()) {
+					materials.add(extract(rs, Material.class));
+				}
+				
+				return materials;
+			}
+		}
+		
+	}//End fetchMaterialsForProject()
+
+	
+	private List<Step> fetchStepsForProject(Connection conn, Integer projectId) throws SQLException {
+		String sql = "SELECT * FROM " + STEP_TABLE + " WHERE project_id = ?";
+		
+		try(PreparedStatement stmt = conn.prepareStatement(sql)){
+			setParameter(stmt, 1, projectId, Integer.class);
+			
+			try(ResultSet rs = stmt.executeQuery()){
+				List<Step> steps = new LinkedList<Step>();
+				
+				while(rs.next()) {
+					steps.add(extract(rs, Step.class));
+				}
+				
+				return steps;
+			}
+		}
+		
+	}//End fetchStepsForProject()
+	
+
+	private List<Category> fetchCategoriesForProject(Connection conn, Integer projectId) throws SQLException {
+		// @formatter:off
+		String sql = ""
+				+ "SELECT c.* FROM " + CATEGORY_TABLE + " c "
+				+ "JOIN " + PROJECT_CATEGORY_TABLE + " pc USING (category_id) "
+				+ "WHERE project_id = ?"
+				;
+		// @formatter:on
+		try(PreparedStatement stmt = conn.prepareStatement(sql)){
+			setParameter(stmt, 1, projectId, Integer.class);
+			
+			try(ResultSet rs = stmt.executeQuery()){
+				List<Category> categories = new LinkedList<Category>();
+				
+				while(rs.next()) {
+					categories.add(extract(rs, Category.class));
+				}
+				
+				return categories;
+			}
+		}
+		
+	}//End fetchCategoriesForProject()
+	
 
 }//End ProjectDao()
