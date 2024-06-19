@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import projects.entity.Project;
 import provided.util.DaoBase;
@@ -99,4 +101,45 @@ public class ProjectDao extends DaoBase {
 		
 	}//End fetchAllProjects()
 
-}
+	
+	public Optional<Project> fetchProjectById(Integer projectId) {
+		String sql = "SELECT * FROM " + PROJECT_TABLE + " WHERE project_id = ?";
+		
+		try(Connection conn = DbConnection.getConnection()){
+			startTransaction(conn);
+			
+			try {
+				Project project = null;
+				
+				try(PreparedStatement stmt = conn.prepareStatement(sql)){
+					setParameter(stmt, 1, projectId, Integer.class);
+					
+					try(ResultSet rs = stmt.executeQuery()){
+						if(rs.next()) {
+							project = extract(rs, Project.class);
+						}
+					}
+				}
+				
+				if(Objects.nonNull(project)) {
+					project.getMaterials().addAll(fetchMaterialsForProject(conn,projectId));
+					project.getSteps().addAll(fetchStepsForProject(conn, projectId));
+					project.getCategories().addAll(fetchCategoriesForProject(conn, projectId));
+				}
+				
+				commitTransaction(conn);
+				
+				return Optional.ofNullable(project);				
+			} catch(Exception e) {
+				rollbackTransaction(conn);
+				throw new DbException(e);
+			}
+			
+		} catch(SQLException e) {
+			throw new DbException(e);
+		}
+		
+		
+	}//End fetchProjectById()
+
+}//End ProjectDao()
