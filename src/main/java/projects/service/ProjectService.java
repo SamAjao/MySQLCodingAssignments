@@ -9,6 +9,7 @@ package projects.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import projects.dao.ProjectDao;
 import projects.entity.Project;
@@ -28,7 +29,10 @@ public class ProjectService {
 	}
 
 	public List<Project> fetchAllProjects() {
-		return projectDao.fetchAllProjects();
+		return projectDao.fetchAllProjects()
+				.stream()
+				.sorted((p1,p2) -> p1.getProjectId() - p2.getProjectId())
+				.collect(Collectors.toList());
 		
 	}
 
